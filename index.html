@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .add-assignment {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e9ecef;
+        }
+
+        .add-assignment h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        input, textarea, select {
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .filter-group select {
+            padding: 8px 12px;
+            min-width: 150px;
+        }
+
+        .assignments-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e9ecef;
+        }
+
+        .assignments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .assignments-header h3 {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .stat-dot.pending {
+            background: #ff6b6b;
+        }
+
+        .stat-dot.completed {
+            background: #51cf66;
+        }
+
+        .assignment-item {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+        }
+
+        .assignment-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .assignment-item.completed {
+            opacity: 0.7;
+            background: #f8f9fa;
+            border-color: #dee2e6;
+        }
+
+        .assignment-item.overdue {
+            border-color: #ff6b6b;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+        }
+
+        .assignment-item.due-soon {
+            border-color: #ffa726;
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        }
+
+        .assignment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .assignment-info h4 {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .assignment-item.completed h4 {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .subject-tag {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .assignment-details {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .assignment-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .due-date {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .due-date.overdue {
+            color: #e53e3e;
+        }
+
+        .due-date.due-soon {
+            color: #d69e2e;
+        }
+
+        .description {
+            color: #6c757d;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .assignment-item.completed .description {
+            text-decoration: line-through;
+        }
+
+        .assignment-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .checkbox {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .checkbox input {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .checkbox-custom {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .checkbox input:checked + .checkbox-custom {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            border-color: #40c057;
+        }
+
+        .checkbox input:checked + .checkbox-custom::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state h4 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .reminder-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                justify-content: space-between;
+            }
+            
+            .assignment-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .assignment-details {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .assignment-actions {
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Assignment Tracker</h1>
+            <p>Stay organized and never miss a deadline</p>
+        </div>
+
+        <div class="main-content">
+            <div class="add-assignment">
+                <h3>➕ Add New Assignment</h3>
+                <form id="assignmentForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="title">Assignment Title *</label>
+                            <input type="text" id="title" required placeholder="e.g., Math Homework Chapter 5">
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <input type="text" id="subject" placeholder="e.g., Mathematics">
+                        </div>
+                        <div class="form-group">
+                            <label for="dueDate">Due Date *</label>
+                            <input type="datetime-local" id="dueDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reminder">Reminder (hours before)</label>
+                            <select id="reminder">
+                                <option value="0">No reminder</option>
+                                <option value="1">1 hour before</option>
+                                <option value="6">6 hours before</option>
+                                <option value="12">12 hours before</option>
+                                <option value="24" selected>1 day before</option>
+                                <option value="48">2 days before</option>
+                                <option value="168">1 week before</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="description">Description (optional)</label>
+                            <textarea id="description" placeholder="Additional details about the assignment..."></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Add Assignment</button>
+                </form>
+            </div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="sortBy">Sort by:</label>
+                    <select id="sortBy">
+                        <option value="dueDate">Due Date</option>
+                        <option value="subject">Subject</option>
+                        <option value="title">Title</option>
+                        <option value="dateAdded">Date Added</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterStatus">Status:</label>
+                    <select id="filterStatus">
+                        <option value="all">All Assignments</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                        <option value="overdue">Overdue</option>
+                        <option value="due-soon">Due Soon</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterSubject">Subject:</label>
+                    <select id="filterSubject">
+                        <option value="all">All Subjects</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="assignments-container">
+                <div class="assignments-header">
+                    <h3>📝 Your Assignments</h3>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-dot pending"></div>
+                            <span id="pendingCount">0 pending</span>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-dot completed"></div>
+                            <span id="completedCount">0 completed</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="assignmentsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AssignmentTracker {
+            constructor() {
+                this.assignments = this.loadAssignments();
+                this.currentSort = 'dueDate';
+                this.currentFilter = 'all';
+                this.currentSubjectFilter = 'all';
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.updateSubjectFilter();
+                this.renderAssignments();
+                this.updateStats();
+                this.checkReminders();
+                setInterval(() => this.checkReminders(), 60000); // Check every minute
+            }
+
+            bindEvents() {
+                document.getElementById('assignmentForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addAssignment();
+                });
+
+                document.getElementById('sortBy').addEventListener('change', (e) => {
+                    this.currentSort = e.target.value;
+                    this.renderAssignments();
+                });
+
+                document.getElementById('filterStatus').addEventListener('change', (e) => {
+                    this.currentFilter = e.target.value;
+                    this.renderAssignments();
+                });
+
+                document.getElementById('filterSubject').addEventListener('change', (e) => {
+                    this.currentSubjectFilter = e.target.value;
+                    this.renderAssignments();
+                });
+            }
+
+            addAssignment() {
+                const form = document.getElementById('assignmentForm');
+                const formData = new FormData(form);
+                
+                const assignment = {
+                    id: Date.now().toString(),
+                    title: document.getElementById('title').value,
+                    subject: document.getElementById('subject').value || 'General',
+                    dueDate: document.getElementById('dueDate').value,
+                    description: document.getElementById('description').value,
+                    reminder: parseInt(document.getElementById('reminder').value),
+                    completed: false,
+                    dateAdded: new Date().toISOString()
+                };
+
+                this.assignments.push(assignment);
+                this.saveAssignments();
+                this.updateSubjectFilter();
+                this.renderAssignments();
+                this.updateStats();
+                form.reset();
+            }
+
+            toggleComplete(id) {
+                const assignment = this.assignments.find(a => a.id === id);
+                if (assignment) {
+                    assignment.completed = !assignment.completed;
+                    this.saveAssignments();
+                    this.renderAssignments();
+                    this.updateStats();
+                }
+            }
+
+            deleteAssignment(id) {
+                if (confirm('Are you sure you want to delete this assignment?')) {
+                    this.assignments = this.assignments.filter(a => a.id !== id);
+                    this.saveAssignments();
+                    this.updateSubjectFilter();
+                    this.renderAssignments();
+                    this.updateStats();
+                }
+            }
+
+            getAssignmentStatus(assignment) {
+                if (assignment.completed) return 'completed';
+                
+                const now = new Date();
+                const dueDate = new Date(assignment.dueDate);
+                const timeDiff = dueDate - now;
+                const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+                if (timeDiff < 0) return 'overdue';
+                if (hoursDiff <= 24) return 'due-soon';
+                return 'pending';
+            }
+
+            shouldShowReminder(assignment) {
+                if (assignment.completed || assignment.reminder === 0) return false;
+                
+                const now = new Date();
+                const dueDate = new Date(assignment.dueDate);
+                const timeDiff = dueDate - now;
+                const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+                return hoursDiff <= assignment.reminder && hoursDiff > 0;
+            }
+
+            checkReminders() {
+                this.assignments.forEach(assignment => {
+                    if (this.shouldShowReminder(assignment)) {
+                        // Visual reminder is handled in rendering
+                    }
+                });
+            }
+
+            formatDueDate(dateString) {
+                const date = new Date(dateString);
+                const now = new Date();
+                const timeDiff = date - now;
+                const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
+
+                let timeString = date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                if (timeDiff < 0) {
+                    return `⚠️ Overdue - ${timeString}`;
+                } else if (daysDiff === 0) {
+                    if (hoursDiff === 0) {
+                        return `🔥 Due now - ${timeString}`;
+                    } else {
+                        return `🔥 Due in ${hoursDiff} hour${hoursDiff !== 1 ? 's' : ''} - ${timeString}`;
+                    }
+                } else if (daysDiff === 1) {
+                    return `⏰ Due tomorrow - ${timeString}`;
+                } else if (daysDiff <= 7) {
+                    return `📅 Due in ${daysDiff} days - ${timeString}`;
+                } else {
+                    return `📅 ${timeString}`;
+                }
+            }
+
+            sortAssignments(assignments) {
+                return assignments.slice().sort((a, b) => {
+                    switch (this.currentSort) {
+                        case 'dueDate':
+                            return new Date(a.dueDate) - new Date(b.dueDate);
+                        case 'subject':
+                            return a.subject.localeCompare(b.subject);
+                        case 'title':
+                            return a.title.localeCompare(b.title);
+                        case 'dateAdded':
+                            return new Date(b.dateAdded) - new Date(a.dateAdded);
+                        default:
+                            return 0;
+                    }
+                });
+            }
+
+            filterAssignments(assignments) {
+                let filtered = assignments;
+
+                // Filter by status
+                if (this.currentFilter !== 'all') {
+                    filtered = filtered.filter(assignment => {
+                        return this.getAssignmentStatus(assignment) === this.currentFilter;
+                    });
+                }
+
+                // Filter by subject
+                if (this.currentSubjectFilter !== 'all') {
+                    filtered = filtered.filter(assignment => {
+                        return assignment.subject === this.currentSubjectFilter;
+                    });
+                }
+
+                return filtered;
+            }
+
+            updateSubjectFilter() {
+                const subjects = [...new Set(this.assignments.map(a => a.subject))].sort();
+                const subjectFilter = document.getElementById('filterSubject');
+                
+                // Clear existing options except "All Subjects"
+                subjectFilter.innerHTML = '<option value="all">All Subjects</option>';
+                
+                subjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject;
+                    option.textContent = subject;
+                    subjectFilter.appendChild(option);
+                });
+            }
+
+            renderAssignments() {
+                const container = document.getElementById('assignmentsList');
+                let assignments = this.filterAssignments(this.assignments);
+                assignments = this.sortAssignments(assignments);
+
+                if (assignments.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h4>📝 No assignments found</h4>
+                            <p>Add your first assignment to get started with tracking your deadlines!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = assignments.map(assignment => {
+                    const status = this.getAssignmentStatus(assignment);
+                    const showReminder = this.shouldShowReminder(assignment);
+                    
+                    return `
+                        <div class="assignment-item ${status}" data-id="${assignment.id}">
+                            ${showReminder ? '<div class="reminder-badge">!</div>' : ''}
+                            <div class="assignment-header">
+                                <div class="assignment-info">
+                                    <h4>${assignment.title}</h4>
+                                    <span class="subject-tag">${assignment.subject}</span>
+                                </div>
+                            </div>
+                            <div class="assignment-details">
+                                <div class="assignment-meta">
+                                    <div class="due-date ${status === 'overdue' ? 'overdue' : status === 'due-soon' ? 'due-soon' : ''}">
+                                        ${this.formatDueDate(assignment.dueDate)}
+                                    </div>
+                                    ${assignment.description ? `<div class="description">${assignment.description}</div>` : ''}
+                                </div>
+                                <div class="assignment-actions">
+                                    <label class="checkbox">
+                                        <input type="checkbox" ${assignment.completed ? 'checked' : ''} 
+                                               onchange="tracker.toggleComplete('${assignment.id}')">
+                                        <div class="checkbox-custom"></div>
+                                    </label>
+                                    <button class="delete-btn" onclick="tracker.deleteAssignment('${assignment.id}')">
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            updateStats() {
+                const pending = this.assignments.filter(a => !a.completed).length;
+                const completed = this.assignments.filter(a => a.completed).length;
+                
+                document.getElementById('pendingCount').textContent = `${pending} pending`;
+                document.getElementById('completedCount').textContent = `${completed} completed`;
+            }
+
+            saveAssignments() {
+                // Store in memory for the session
+                // Note: localStorage is not available in Claude.ai artifacts
+            }
+
+            loadAssignments() {
+                // Return empty array since we can't use localStorage
+                // In a real environment, this would load from localStorage
+                return [];
+            }
+        }
+
+        // Initialize the app
+        const tracker = new AssignmentTracker();
+
+        // Set default due date to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(23, 59);
+        document.getElementById('dueDate').value = tomorrow.toISOString().slice(0, 16);
+    </script>
+</body>
+</html>
